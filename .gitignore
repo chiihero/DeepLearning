@@ -114,6 +114,6 @@ dmypy.json
 .pyre/
 
 .idea/workspace.xml
-*.CHII
 .idea/
 demo/
+photo/
