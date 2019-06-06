@@ -28,8 +28,9 @@ test_img = test_img.astype('float32') / 255
 train_lab = to_categorical(train_lab)
 test_lab = to_categorical(test_lab)
 
-history = model.fit(train_img,train_lab,validation_data=(test_img,test_lab),epochs=200,batch_size=128,callbacks=callbacklist)
+history = model.fit(train_img,train_lab,validation_data=(test_img,test_lab),epochs=20,batch_size=128,callbacks=callbacklist)
 
+model.save('mnist.h5')
 # model = models.load_model('e:/model.hdf5')
 # test_loss, test_acc = model.evaluate(test_img, test_lab)
 #
