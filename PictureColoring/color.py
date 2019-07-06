@@ -22,7 +22,7 @@ from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_a
 inputcolor = "E:\\Chii\\百度云\\GitHub\\DeepLearning\\PictureColoring\\photo\\color\\"
 inputbw = "E:\\Chii\\百度云\\GitHub\\DeepLearning\\PictureColoring\\photo\\black&white\\"
 outputfile = "E:\\Chii\\百度云\\GitHub\\DeepLearning\\PictureColoring\\photo\\netcolor\\"
-batch_size=10
+batch_size=5
 def get_session(gpu_fraction=0.7):
     '''Assume that you have 6GB of GPU memory and want to allocate ~2GB'''
 
@@ -40,25 +40,27 @@ KTF.set_session(get_session())
 
 
 def load_data():
-    imgs = os.listdir(inputcolor)
+    # imgs = os.listdir(inputcolor)
     # num = len(imgs)
-    num = 100
-    data = np.empty((num, 256, 256,1), dtype=float)
-    label = np.empty((num, 256, 256, 2), dtype=float)
-    for i in tqdm.trange(0, num, desc='Task', ncols=100):
-        # Img = Image.open(inputcolor + imgs[i])
-        Img = img_to_array(load_img(inputcolor + imgs[i]))
-        Img = np.array(Img, dtype=float)
-        Img = rgb2lab(1.0 / 255 * Img)
-
-        greyImg = Img[:, :,0]
-        greyImg = greyImg.reshape(256, 256, 1)
-
-        colorImg = Img[:, :, 1:]/128
-        colorImg = colorImg.reshape(256, 256, 2)
-
-        data[i] = greyImg
-        label[i] = colorImg
+    # # num = 1000
+    # data = np.empty((num, 256, 256,1), dtype=float)
+    # label = np.empty((num, 256, 256, 2), dtype=float)
+    # for i in tqdm.trange(0, num, desc='Task', ncols=100):
+    #     Img = img_to_array(load_img(inputcolor + imgs[i]))
+    #     Img = np.array(Img, dtype=float)
+    #     Img = rgb2lab(1.0 / 255 * Img)
+    #
+    #     greyImg = Img[:, :,0]
+    #     greyImg = greyImg.reshape(256, 256, 1)
+    #     colorImg = Img[:, :, 1:]/128
+    #     colorImg = colorImg.reshape(256, 256, 2)
+    #
+    #     data[i] = greyImg
+    #     label[i] = colorImg
+    img = np.load("./Utils/save_Imgz.npz")
+    img =img['arr_0']
+    data = img[:, :, :, 0].reshape(-1,128, 128, 1)
+    label = img[:, :, :, 1:]
 
     return data, label
 
@@ -69,10 +71,8 @@ def build_model():
     model.add(layers.Conv2D(64, (3, 3), activation='relu', padding='same'))
     model.add(layers.Conv2D(64, (3, 3), activation='relu', padding='same', strides=2))
     model.add(layers.Conv2D(128, (3, 3), activation='relu', padding='same'))
-
     model.add(layers.Conv2D(128, (3, 3), activation='relu', padding='same', strides=2))
     model.add(layers.Conv2D(256, (3, 3), activation='relu', padding='same'))
-
     model.add(layers.Conv2D(256, (3, 3), activation='relu', padding='same', strides=2))
     model.add(layers.Conv2D(512, (3, 3), activation='relu', padding='same'))
     model.add(layers.Conv2D(256, (3, 3), activation='relu', padding='same'))
@@ -85,19 +85,7 @@ def build_model():
     model.add(layers.Conv2D(16, (3, 3), activation='relu', padding='same'))
     model.add(layers.Conv2D(2, (3, 3), activation='tanh', padding='same'))
     model.add(layers.UpSampling2D((2, 2)))
-    # model.add(layers.InputLayer(input_shape=(None, None, 1)))
-    # model.add(layers.Conv2D(8, (3, 3), activation='relu', padding='same', strides=2))
-    # model.add(layers.Conv2D(8, (3, 3), activation='relu', padding='same'))
-    # model.add(layers.Conv2D(16, (3, 3), activation='relu', padding='same'))
-    # model.add(layers.Conv2D(16, (3, 3), activation='relu', padding='same', strides=2))
-    # model.add(layers.Conv2D(32, (3, 3), activation='relu', padding='same'))
-    # model.add(layers.Conv2D(32, (3, 3), activation='relu', padding='same', strides=2))
-    # model.add(layers.UpSampling2D((2, 2)))
-    # model.add(layers.Conv2D(32, (3, 3), activation='relu', padding='same'))
-    # model.add(layers.UpSampling2D((2, 2)))
-    # model.add(layers.Conv2D(16, (3, 3), activation='relu', padding='same'))
-    # model.add(layers.UpSampling2D((2, 2)))
-    # model.add(layers.Conv2D(2, (3, 3), activation='tanh', padding='same'))
+
     model.compile(optimizer='rmsprop', loss='mse')
     return model
 
@@ -106,10 +94,12 @@ def train():
     data, label = load_data()
     print(data.shape[0])
     slite= int(data.shape[0]*0.9)
+    slite= 100
+
     train_data = data[:slite]
     train_labels = label[:slite]
-    test_data = data[slite:]
-    test_labels = label[slite:]
+    test_data = data[slite:120]
+    test_labels = label[slite:120]
     model = build_model()
     model_file = 'simple_model.model'
 
@@ -123,8 +113,8 @@ def train():
 
     history = model.fit_generator(generator=data_generator(train_data, train_labels, batch_size),
                                   validation_data=(test_data, test_labels),
-                                  epochs=10,
-                                  steps_per_epoch=10
+                                  epochs=100,
+                                  steps_per_epoch=len(train_labels)
                                   )
     model.save(model_file)
     # model = keras.models.load_model(model_file)

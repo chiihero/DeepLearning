@@ -5,7 +5,7 @@ from PIL import ImageFile
 import tqdm
 from PIL.Image import EXTENT
 ImageFile.LOAD_TRUNCATED_IMAGES = True
-input = "D:\\photo\\temp\\original\\"
+input = "D:\\photo\\temp\\"
 # outputcolor ="D:\\photo\\temp\\color\\"
 # outputbw ="D:\\photo\\temp\\black&white\\"
 outputcolor = "E:\\Chii\\百度云\\GitHub\\DeepLearning\\PictureColoring\\photo\\color\\"
@@ -29,7 +29,7 @@ def c2bw(inputfile):
         offset = int(w - h) / 2
         outcolor = img.crop((offset,0,offset+h,h))
     # 图片缩小
-    outcolor = outcolor.resize((256, 256), Image.ANTIALIAS).convert('LAB')
+    outcolor = outcolor.resize((128, 128), Image.ANTIALIAS).convert('RGB')
     outcolor.save(outputcolor + inputfile, 'JPEG')
     # 图片黑白
     outbw = outcolor.convert('L')

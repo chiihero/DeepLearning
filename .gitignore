@@ -117,3 +117,6 @@ dmypy.json
 .idea/
 demo/
 photo/
+*.CHII
+*.jpg
+*.npz
